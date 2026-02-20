@@ -4,7 +4,34 @@
 // ============================================================
 
 import * as assert from 'assert';
-import { CompilationStatusMonitor } from '../services/compilationStatusMonitor';
+
+// ------------------------------------------------------------
+// Mock VS Code module before requiring dependent modules
+// ------------------------------------------------------------
+const Module = require('module');
+const originalRequire = Module.prototype.require;
+Module.prototype.require = function (path: string) {
+    if (path === 'vscode') {
+        return {
+            EventEmitter: class {
+                event = () => { };
+                fire() { }
+                dispose() { }
+            },
+            window: {
+                createOutputChannel: () => ({ appendLine: () => { }, dispose: () => { } })
+            },
+            workspace: {
+                onDidChangeWorkspaceFolders: () => ({ dispose: () => { } })
+            }
+        };
+    }
+    return originalRequire.apply(this, arguments);
+};
+
+// Now safe to require the service
+import type { CompilationStatusMonitor as CSMType } from '../services/compilationStatusMonitor';
+const { CompilationStatusMonitor } = require('../services/compilationStatusMonitor') as { CompilationStatusMonitor: typeof CSMType };
 import {
     CompilationStatus,
     CompilationDiagnosticSeverity,
@@ -46,11 +73,24 @@ class MockExtensionContext {
 }
 
 // ============================================================
-// Test Suite
+// Test Suite Framework (for native Node.js execution)
+// ============================================================
+
+const _tests: Array<{ name: string; fn: (done?: any) => void | Promise<void> }> = [];
+let _setup: (() => void) | undefined;
+let _teardown: (() => void) | undefined;
+
+function suite(name: string, cb: () => void) { cb(); }
+function setup(cb: () => void) { _setup = cb; }
+function teardown(cb: () => void) { _teardown = cb; }
+function test(name: string, cb: (done?: any) => void | Promise<void>) { _tests.push({ name, fn: cb }); }
+
+// ============================================================
+// Compilation Status tests
 // ============================================================
 
 suite('CompilationStatusMonitor', () => {
-    let monitor: CompilationStatusMonitor;
+    let monitor: CSMType;
     let mockContext: MockExtensionContext;
     const testContractPath = '/test/contracts/test-contract';
     const testContractName = 'test-contract';
@@ -383,7 +423,7 @@ warning: unused variable
     test('should emit status change events', (done) => {
         let eventReceived = false;
 
-        monitor.onStatusChange((event) => {
+        monitor.onStatusChange((event: any) => {
             if (!eventReceived) {
                 eventReceived = true;
                 assert.strictEqual(event.contractPath, testContractPath);
@@ -400,7 +440,7 @@ warning: unused variable
     test('should emit compilation events', (done) => {
         let eventCount = 0;
 
-        monitor.onCompilationEvent((event) => {
+        monitor.onCompilationEvent((event: any) => {
             eventCount++;
             if (eventCount === 1) {
                 assert.strictEqual(event.status, CompilationStatus.IN_PROGRESS);
@@ -437,4 +477,43 @@ warning: unused variable
         const status = monitor.getCurrentStatus(testContractPath);
         assert.strictEqual(status?.timestamp, event2.timestamp);
     });
+});
+
+// Run tests
+async function run() {
+    let passed = 0;
+    let failed = 0;
+
+    console.log('\nCompilationStatusMonitor unit tests');
+    for (const t of _tests) {
+        try {
+            if (_setup) _setup();
+
+            if (t.fn.length > 0) {
+                await new Promise<void>((resolve, reject) => {
+                    t.fn((err?: any) => err ? reject(err) : resolve());
+                });
+            } else {
+                const res = t.fn();
+                if (res instanceof Promise) await res;
+            }
+
+            passed += 1;
+            console.log(`  [ok] ${t.name}`);
+        } catch (error) {
+            failed += 1;
+            console.error(`  [fail] ${t.name}`);
+            console.error(`         ${error instanceof Error ? error.message : String(error)}`);
+        } finally {
+            if (_teardown) _teardown();
+        }
+    }
+
+    console.log(`\n${passed + failed} tests: ${passed} passed, ${failed} failed`);
+    if (failed > 0) process.exitCode = 1;
+}
+
+run().catch(error => {
+    console.error('Test runner error:', error);
+    process.exitCode = 1;
 });

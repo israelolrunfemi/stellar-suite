@@ -562,9 +562,9 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
         if (!workspaceFolders) { return []; }
 
         const deploymentHistory = this._getDeploymentHistory();
-        const hidden          = this._context.workspaceState.get<string[]>('stellarSuite.hiddenContracts', []);
-        const aliases         = this._context.workspaceState.get<Record<string, string>>('stellarSuite.contractAliases', {});
-        const pinned          = this._context.workspaceState.get<string[]>('stellarSuite.pinnedContracts', []);
+        const hidden = this._context.workspaceState.get<string[]>('stellarSuite.hiddenContracts', []);
+        const aliases = this._context.workspaceState.get<Record<string, string>>('stellarSuite.contractAliases', {});
+        const pinned = this._context.workspaceState.get<string[]>('stellarSuite.pinnedContracts', []);
         const networkOverrides = this._context.workspaceState.get<Record<string, string>>('stellarSuite.contractNetworkOverrides', {});
         const manualTemplateAssignments = this._context.workspaceState.get<Record<string, string>>(
             'stellarSuite.manualTemplateAssignments',
@@ -610,14 +610,14 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
                 const contractName = nameMatch ? nameMatch[1] : path.basename(rootPath);
 
                 const wasmPath = path.join(rootPath, 'target', 'wasm32-unknown-unknown', 'release');
-                const isBuilt  = fs.existsSync(wasmPath) &&
+                const isBuilt = fs.existsSync(wasmPath) &&
                     fs.readdirSync(wasmPath).some((f: string) => f.endsWith('.wasm'));
 
                 const deployedContracts = this._context.workspaceState.get<Record<string, string>>(
                     'stellarSuite.deployedContracts', {}
                 );
                 const contractId = deployedContracts[rootPath];
-                const config     = vscode.workspace.getConfiguration('stellarSuite');
+                const config = vscode.workspace.getConfiguration('stellarSuite');
                 const lastDeployment = contractId
                     ? [...deploymentHistory].reverse().find(d => d.contractId === contractId)
                     : undefined;
@@ -626,12 +626,18 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
                 const versionState = this.versionTracker.getContractVersionState(
                     cargoPath, contractName
                 );
+
+                const manualTemplateAssignments = this._context.workspaceState.get<Record<string, string>>(
+                    'stellarSuite.manualTemplateAssignments',
+                    {}
+                );
+
                 const templateResult = this.templateService.detectTemplate({
                     cargoTomlPath: cargoPath,
                     contractDir: rootPath,
                     contractName,
-                    manualTemplateId: options?.manualTemplateAssignments?.[cargoPath],
-                    customTemplates: options?.customTemplates || [],
+                    manualTemplateId: manualTemplateAssignments[cargoPath],
+                    customTemplates: [],
                 });
 
                 results.push({
@@ -639,14 +645,14 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
                     path: cargoPath,
                     contractId,
                     isBuilt,
-                    hasWasm:              isBuilt,
-                    deployedAt:           lastDeployment?.deployedAt,
-                    lastDeployed:         lastDeployment?.deployedAt,
-                    network:              lastDeployment?.network ?? config.get<string>('network', 'testnet'),
-                    source:               lastDeployment?.source  ?? config.get<string>('source',  'dev'),
-                    localVersion:         versionState.localVersion,
-                    deployedVersion:      versionState.deployedVersion,
-                    hasVersionMismatch:   versionState.hasMismatch,
+                    hasWasm: isBuilt,
+                    deployedAt: lastDeployment?.deployedAt,
+                    lastDeployed: lastDeployment?.deployedAt,
+                    network: lastDeployment?.network ?? config.get<string>('network', 'testnet'),
+                    source: lastDeployment?.source ?? config.get<string>('source', 'dev'),
+                    localVersion: versionState.localVersion,
+                    deployedVersion: versionState.deployedVersion,
+                    hasVersionMismatch: versionState.hasMismatch,
                     versionMismatchMessage: versionState.mismatch?.message,
                     templateId: templateResult.templateId,
                     templateCategory: templateResult.category,

@@ -13,6 +13,7 @@ import { registerSimulationHistoryCommands } from "./commands/simulationHistoryC
 import { registerBackupCommands } from "./commands/backupCommands";
 import { registerReplayCommands } from "./commands/replayCommands";
 import { registerResourceProfilingCommands } from "./commands/resourceProfilingCommands";
+import { registerRpcLoggingCommands } from "./commands/rpcLoggingCommands";
 
 // Services
 import { ContractGroupService } from "./services/contractGroupService";
@@ -21,6 +22,7 @@ import { ContractVersionTracker } from "./services/contractVersionTracker";
 import { WorkspaceStateSyncService } from "./services/workspaceStateSyncService";
 import { WorkspaceStateEncryptionService } from "./services/workspaceStateEncryptionService";
 import { RpcHealthMonitor } from "./services/rpcHealthMonitor";
+import { RpcLogger } from "./services/rpcLogger";
 import { SimulationHistoryService } from "./services/simulationHistoryService";
 import { CompilationStatusMonitor } from "./services/compilationStatusMonitor";
 import { StateBackupService } from "./services/stateBackupService";
@@ -265,8 +267,8 @@ export function activate(context: vscode.ExtensionContext) {
       watcher,
       { dispose: () => metadataService?.dispose() },
       syncStatusProvider,
-      healthStatusBar ?? new vscode.Disposable(() => {}),
-      healthMonitor ?? new vscode.Disposable(() => {}),
+      healthStatusBar ?? new vscode.Disposable(() => { }),
+      healthMonitor ?? new vscode.Disposable(() => { }),
     );
 
     outputChannel.appendLine('[Extension] Extension activation complete');
