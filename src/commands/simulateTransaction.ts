@@ -14,6 +14,9 @@ export async function simulateTransaction(
     context: vscode.ExtensionContext,
     sidebarProvider?: SidebarViewProvider
 ) {
+import { SimulationHistoryService } from '../services/simulationHistoryService';
+
+export async function simulateTransaction(context: vscode.ExtensionContext, sidebarProvider?: SidebarViewProvider, historyService?: SimulationHistoryService) {
     try {
         const resolvedCliConfig = await resolveCliConfigurationForCommand(context);
         if (!resolvedCliConfig.validation.valid) {
@@ -183,6 +186,8 @@ export async function simulateTransaction(
                 progress.report({ increment: 0, message: 'Initializing...' });
 
                 let result;
+                const simulationStartTime = Date.now();
+                let simulationMethod: 'cli' | 'rpc' = useLocalCli ? 'cli' : 'rpc';
 
                 if (useLocalCli) {
                     progress.report({ increment: 30, message: 'Using Stellar CLI...' });
@@ -221,6 +226,7 @@ export async function simulateTransaction(
                     );
                 }
 
+                const durationMs = Date.now() - simulationStartTime;
                 progress.report({ increment: 100, message: 'Complete' });
 
                 panel.updateResults(
@@ -229,6 +235,31 @@ export async function simulateTransaction(
                     functionName,
                     args
                 );
+                // Record simulation in history
+                if (historyService) {
+                    try {
+                        await historyService.recordSimulation({
+                            contractId,
+                            functionName,
+                            args,
+                            outcome: result.success ? 'success' : 'failure',
+                            result: result.result,
+                            error: result.error,
+                            errorType: result.errorType,
+                            resourceUsage: result.resourceUsage,
+                            network,
+                            source,
+                            method: simulationMethod,
+                            durationMs,
+                        });
+                    } catch (historyError) {
+                        // History recording should never block the simulation flow
+                        console.warn('[Stellar Suite] Failed to record simulation history:', historyError);
+                    }
+                }
+
+                // Update panel with results
+                panel.updateResults(result, contractId, functionName, args);
 
                 if (sidebarProvider) {
                     sidebarProvider.showSimulationResult(contractId, result);
