@@ -52,6 +52,13 @@ export interface DeploymentRecord {
     source: string;
 }
 
+type RefreshSource = 'auto' | 'manual' | 'system';
+
+interface RefreshOptions {
+    source?: RefreshSource;
+    changedPaths?: string[];
+}
+
 export class SidebarViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'stellarSuite.contractsView';
 
@@ -117,7 +124,7 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
                     break;
 
                 case 'refresh':
-                    this.refresh();
+                    this.refresh({ source: 'manual' });
                     break;
 
                 // ── Context menu ──────────────────────────────
@@ -264,17 +271,55 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
         this.refresh();
     }
 
-    public refresh() {
+    public refresh(options: RefreshOptions = {}) {
         if (!this._view) { return; }
-        this.outputChannel.appendLine('[Sidebar] Refreshing contract data…');
+        const source = options.source ?? 'system';
+        const changedPaths = options.changedPaths ?? [];
 
-        const discovered    = this._discoverContracts();
-        const ordered       = this.reorderingService.applyOrder(discovered);
-        this._lastContracts = ordered;
+        this._view.webview.postMessage({
+            type: 'refresh:status',
+            status: 'refreshing',
+            source,
+            changedCount: changedPaths.length,
+        });
 
-        const deployments    = this._getDeploymentHistory();
-        const versionStates  = this._getVersionStates(ordered);
-        this._view.webview.postMessage({ type: 'update', contracts: ordered, deployments, versionStates });
+        try {
+            this.outputChannel.appendLine(`[Sidebar] Refreshing contract data (${source})…`);
+
+            const contracts = changedPaths.length
+                ? this._refreshIncremental(changedPaths)
+                : this._discoverContracts();
+
+            const ordered       = this.reorderingService.applyOrder(contracts);
+            this._lastContracts = ordered;
+
+            const deployments    = this._getDeploymentHistory();
+            const versionStates  = this._getVersionStates(ordered);
+            this._view.webview.postMessage({ type: 'update', contracts: ordered, deployments, versionStates });
+            this._view.webview.postMessage({
+                type: 'refresh:status',
+                status: 'success',
+                source,
+                changedCount: changedPaths.length,
+                refreshedAt: new Date().toISOString(),
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.outputChannel.appendLine(`[Sidebar] Refresh error: ${message}`);
+            this._view.webview.postMessage({
+                type: 'refresh:status',
+                status: 'error',
+                source,
+                error: message,
+            });
+            this._view.webview.postMessage({
+                type: 'actionFeedback',
+                feedback: {
+                    type: 'error',
+                    message: `Failed to refresh contracts: ${message}`,
+                },
+            });
+        }
     }
 
     /** Expose versionTracker for use by commands (e.g. deployContract). */
@@ -318,6 +363,104 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
 
         this.outputChannel.appendLine(`[Sidebar] Discovered ${contracts.length} contract(s)`);
         return contracts;
+    }
+
+    private _refreshIncremental(changedPaths: string[]): ContractInfo[] {
+        if (!this._lastContracts.length) {
+            return this._discoverContracts();
+        }
+
+        const changedContractPaths = new Set<string>();
+        for (const changedPath of changedPaths) {
+            const cargoPath = this._resolveCargoPath(changedPath);
+            if (cargoPath) {
+                changedContractPaths.add(cargoPath);
+            }
+        }
+
+        if (!changedContractPaths.size) {
+            return this._lastContracts;
+        }
+
+        const updated = new Map(this._lastContracts.map(c => [c.path, c]));
+        for (const cargoPath of changedContractPaths) {
+            const updatedContract = this._createContractInfo(cargoPath);
+            if (updatedContract) {
+                updated.set(cargoPath, updatedContract);
+            } else {
+                updated.delete(cargoPath);
+            }
+        }
+
+        return Array.from(updated.values());
+    }
+
+    private _resolveCargoPath(changedPath: string): string | undefined {
+        const normalized = changedPath.replace(/\\/g, '/');
+        if (path.basename(normalized) === 'Cargo.toml') {
+            return changedPath;
+        }
+
+        if (!normalized.endsWith('.wasm')) {
+            return undefined;
+        }
+
+        let dir = path.dirname(changedPath);
+        for (let i = 0; i < 8; i++) {
+            const candidate = path.join(dir, 'Cargo.toml');
+            if (fs.existsSync(candidate)) {
+                return candidate;
+            }
+            const parent = path.dirname(dir);
+            if (parent === dir) { break; }
+            dir = parent;
+        }
+
+        return undefined;
+    }
+
+    private _createContractInfo(cargoPath: string): ContractInfo | undefined {
+        if (!fs.existsSync(cargoPath)) {
+            return undefined;
+        }
+
+        const cargoContent = fs.readFileSync(cargoPath, 'utf-8');
+        if (!cargoContent.includes('soroban-sdk')) {
+            return undefined;
+        }
+
+        const hidden           = this._context.workspaceState.get<string[]>('stellarSuite.hiddenContracts', []);
+        const aliases          = this._context.workspaceState.get<Record<string, string>>('stellarSuite.contractAliases', {});
+        const pinned           = this._context.workspaceState.get<string[]>('stellarSuite.pinnedContracts', []);
+        const networkOverrides = this._context.workspaceState.get<Record<string, string>>('stellarSuite.contractNetworkOverrides', {});
+
+        if (hidden.includes(cargoPath)) {
+            return undefined;
+        }
+
+        const rootPath      = path.dirname(cargoPath);
+        const nameMatch     = cargoContent.match(/^\s*name\s*=\s*"([^"]+)"/m);
+        const detectedName  = nameMatch ? nameMatch[1] : path.basename(rootPath);
+        const deployed      = this._context.workspaceState.get<Record<string, string>>('stellarSuite.deployedContracts', {});
+        const config        = vscode.workspace.getConfiguration('stellarSuite');
+        const wasmPath      = path.join(rootPath, 'target', 'wasm32-unknown-unknown', 'release');
+        const hasWasm       = fs.existsSync(wasmPath) && fs.readdirSync(wasmPath).some(f => f.endsWith('.wasm'));
+        const versionState  = this.versionTracker.getContractVersionState(cargoPath, detectedName);
+
+        return {
+            name: aliases[cargoPath] || detectedName,
+            path: cargoPath,
+            contractId: deployed[rootPath],
+            isBuilt: hasWasm,
+            hasWasm,
+            isPinned: pinned.includes(cargoPath),
+            network: networkOverrides[cargoPath] || config.get<string>('network', 'testnet'),
+            source: config.get<string>('source', 'dev'),
+            localVersion: versionState.localVersion,
+            deployedVersion: versionState.deployedVersion,
+            hasVersionMismatch: versionState.hasMismatch,
+            versionMismatchMessage: versionState.mismatch?.message,
+        };
     }
 
     private _findContracts(rootPath: string, depth = 0): ContractInfo[] {
@@ -459,6 +602,21 @@ body {
     white-space:   nowrap;
 }
 .icon-btn:hover { color: var(--color-fg); background: var(--color-card-hover); }
+
+.refresh-status {
+    font-size: 11px;
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 2px 8px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.refresh-status.is-refreshing { color: var(--color-accent); border-color: rgba(88,166,255,.35); }
+.refresh-status.is-success    { color: var(--color-success); }
+.refresh-status.is-error      { color: var(--color-danger); border-color: rgba(241,76,76,.35); }
 
 /* ── Section headings ───────────────────────────────────── */
 .section-label {
@@ -757,6 +915,7 @@ body {
 <div class="header">
     <h1>Stellar Suite</h1>
     <div class="header-actions">
+        <span id="refresh-status" class="refresh-status" title="Sidebar refresh status">Idle</span>
         <button class="icon-btn" id="reset-order-btn" title="Reset contract order to default">↺ Reset order</button>
         <button class="icon-btn" id="refresh-btn"     title="Refresh contracts">↻ Refresh</button>
     </div>
@@ -819,6 +978,9 @@ window.addEventListener('message', (event) => {
             break;
         case 'version:history':
             displayVersionHistory(msg.contractPath, msg.history || []);
+            break;
+        case 'refresh:status':
+            updateRefreshStatus(msg);
             break;
     }
 });
@@ -1066,6 +1228,31 @@ function invokeAction(actionId) {
     if (!_activeMenuContract) { return; }
     hideContextMenu();
     vscode.postMessage({ type: 'contextMenu:action', actionId, ...(_activeMenuContract) });
+}
+
+function updateRefreshStatus(statusMsg) {
+    const statusEl = document.getElementById('refresh-status');
+    if (!statusEl || !statusMsg) { return; }
+
+    statusEl.classList.remove('is-refreshing', 'is-success', 'is-error');
+
+    if (statusMsg.status === 'refreshing') {
+        statusEl.classList.add('is-refreshing');
+        const changeHint = statusMsg.changedCount ? ' · ' + statusMsg.changedCount + ' change(s)' : '';
+        statusEl.textContent = 'Refreshing (' + (statusMsg.source || 'system') + ')' + changeHint;
+        return;
+    }
+
+    if (statusMsg.status === 'error') {
+        statusEl.classList.add('is-error');
+        statusEl.textContent = 'Refresh failed';
+        statusEl.title = statusMsg.error || 'Refresh failed';
+        return;
+    }
+
+    statusEl.classList.add('is-success');
+    statusEl.textContent = statusMsg.source === 'auto' ? 'Auto-refreshed' : 'Refreshed';
+    statusEl.title = statusMsg.refreshedAt || 'Refresh complete';
 }
 
 // ── Toast ─────────────────────────────────────────────────────

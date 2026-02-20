@@ -8,48 +8,38 @@ import { simulateTransaction } from './commands/simulateTransaction';
 import { deployContract } from './commands/deployContract';
 import { buildContract } from './commands/buildContract';
 import { registerGroupCommands } from './commands/groupCommands';
+import { manageCliConfiguration } from './commands/manageCliConfiguration';
+import { registerSyncCommands } from './commands/syncCommands';
 import { SidebarViewProvider } from './ui/sidebarView';
 import { ContractGroupService } from './services/contractGroupService';
 import { ContractVersionTracker } from './services/contractVersionTracker';
+import { WorkspaceStateSyncService } from './services/workspaceStateSyncService';
+import { SidebarAutoRefreshService } from './services/sidebarAutoRefreshService';
+import { SyncStatusProvider } from './ui/syncStatusProvider';
 
 let sidebarProvider: SidebarViewProvider | undefined;
 let groupService: ContractGroupService | undefined;
 let versionTracker: ContractVersionTracker | undefined;
-import { manageCliConfiguration } from './commands/manageCliConfiguration';
-import { registerSyncCommands } from './commands/syncCommands';
-import { SidebarViewProvider } from './ui/sidebarView';
-import { WorkspaceStateSyncService } from './services/workspaceStateSyncService';
-import { SyncStatusProvider } from './ui/syncStatusProvider';
-
-let sidebarProvider: SidebarViewProvider | undefined;
 let syncService: WorkspaceStateSyncService | undefined;
 let syncStatusProvider: SyncStatusProvider | undefined;
+let autoRefreshService: SidebarAutoRefreshService | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('Stellar Suite');
     outputChannel.appendLine('[Extension] Activating Stellar Suite extension...');
-    console.log('[Stellar Suite] Extension activating...');
 
     try {
-        // Initialize contract group service
         groupService = new ContractGroupService(context);
         groupService.loadGroups().then(() => {
             outputChannel.appendLine('[Extension] Contract group service initialized');
         });
-
-        // Register group commands
         registerGroupCommands(context, groupService);
-        outputChannel.appendLine('[Extension] Group commands registered');
 
-        // Initialize version tracker
         versionTracker = new ContractVersionTracker(context, outputChannel);
-        outputChannel.appendLine('[Extension] Contract version tracker initialized');
-        // Initialize workspace state synchronization
+
         syncService = new WorkspaceStateSyncService(context);
         syncStatusProvider = new SyncStatusProvider(syncService);
-        outputChannel.appendLine('[Extension] Workspace state sync service initialized');
 
-        // ── Sidebar ───────────────────────────────────────────
         sidebarProvider = new SidebarViewProvider(context.extensionUri, context);
         context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
@@ -57,9 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
                 sidebarProvider
             )
         );
-        outputChannel.appendLine('[Extension] Sidebar view provider registered');
 
-        // ── Core commands ─────────────────────────────────────
         const simulateCommand = vscode.commands.registerCommand(
             'stellarSuite.simulateTransaction',
             () => simulateTransaction(context, sidebarProvider)
@@ -80,14 +68,16 @@ export function activate(context: vscode.ExtensionContext) {
             () => manageCliConfiguration(context)
         );
 
+        autoRefreshService = new SidebarAutoRefreshService(sidebarProvider, outputChannel);
+
         const refreshCommand = vscode.commands.registerCommand(
             'stellarSuite.refreshContracts',
             () => {
-                if (sidebarProvider) {
-                    sidebarProvider.refresh();
-                } else {
-                    outputChannel.appendLine('[Extension] WARNING: sidebarProvider not available');
+                if (autoRefreshService) {
+                    autoRefreshService.triggerManualRefresh();
+                    return;
                 }
+                sidebarProvider?.refresh({ source: 'manual' });
             }
         );
 
@@ -100,11 +90,6 @@ export function activate(context: vscode.ExtensionContext) {
             'stellarSuite.simulateFromSidebar',
             () => simulateTransaction(context, sidebarProvider)
         );
-
-        // ── Context menu commands (callable from Command Palette) ──
-        //
-        // These mirror the context menu actions so power users can
-        // also trigger them via Ctrl+Shift+P.
 
         const copyContractIdCommand = vscode.commands.registerCommand(
             'stellarSuite.copyContractId',
@@ -120,7 +105,6 @@ export function activate(context: vscode.ExtensionContext) {
             }
         );
 
-        // ── Version tracking commands ─────────────────────────
         const showVersionMismatchesCommand = vscode.commands.registerCommand(
             'stellarSuite.showVersionMismatches',
             async () => {
@@ -133,20 +117,10 @@ export function activate(context: vscode.ExtensionContext) {
                 await versionTracker.notifyMismatches();
             }
         );
-        // Register sync commands
+
         if (syncService) {
             registerSyncCommands(context, syncService);
-            outputChannel.appendLine('[Extension] Workspace sync commands registered');
         }
-
-        outputChannel.appendLine('[Extension] All commands registered');
-
-        // ── File watcher ──────────────────────────────────────
-        const watcher = vscode.workspace.createFileSystemWatcher('**/{Cargo.toml,*.wasm}');
-        const refreshOnChange = () => sidebarProvider?.refresh();
-        watcher.onDidChange(refreshOnChange);
-        watcher.onDidCreate(refreshOnChange);
-        watcher.onDidDelete(refreshOnChange);
 
         context.subscriptions.push(
             simulateCommand,
@@ -158,25 +132,21 @@ export function activate(context: vscode.ExtensionContext) {
             simulateFromSidebarCommand,
             copyContractIdCommand,
             showVersionMismatchesCommand,
-            watcher
-            watcher,
-            syncStatusProvider || { dispose: () => {} }
+            autoRefreshService,
+            syncStatusProvider || { dispose: () => {} },
+            outputChannel
         );
 
         outputChannel.appendLine('[Extension] Extension activation complete');
-        console.log('[Stellar Suite] Extension activation complete');
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         outputChannel.appendLine(`[Extension] ERROR during activation: ${errorMsg}`);
-        if (error instanceof Error && error.stack) {
-            outputChannel.appendLine(`[Extension] Stack: ${error.stack}`);
-        }
-        console.error('[Stellar Suite] Activation error:', error);
         vscode.window.showErrorMessage(`Stellar Suite activation failed: ${errorMsg}`);
     }
 }
 
 export function deactivate() {
+    autoRefreshService?.dispose();
     syncStatusProvider?.dispose();
 }

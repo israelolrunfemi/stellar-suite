@@ -138,9 +138,10 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile",
-    "test": "npm run test:cli-errors && npm run test:version-tracker",
+    "test": "npm run test:cli-errors && npm run test:version-tracker && npm run test:sidebar-auto-refresh",
     "test:cli-errors": "tsc --module commonjs --target ES2020 --lib ES2020,DOM --esModuleInterop --skipLibCheck --rootDir src --outDir out-test src/utils/cliErrorParser.ts src/test/cliErrorParser.test.ts && node out-test/test/cliErrorParser.test.js",
-    "test:version-tracker": "tsc --module commonjs --target ES2020 --lib ES2020,DOM --esModuleInterop --skipLibCheck --rootDir src --outDir out-test src/utils/versionParser.ts src/services/contractVersionTracker.ts src/test/versionTracker.test.ts && node out-test/test/versionTracker.test.js"
+    "test:version-tracker": "tsc --module commonjs --target ES2020 --lib ES2020,DOM --esModuleInterop --skipLibCheck --rootDir src --outDir out-test src/utils/versionParser.ts src/services/contractVersionTracker.ts src/test/versionTracker.test.ts && node out-test/test/versionTracker.test.js",
+    "test:sidebar-auto-refresh": "tsc --module commonjs --target ES2020 --lib ES2020,DOM --esModuleInterop --skipLibCheck --rootDir src --outDir out-test src/services/sidebarAutoRefreshService.ts src/test/sidebarAutoRefreshService.test.ts && node -e 'const fs=require(\"fs\");fs.mkdirSync(\"out-test/node_modules/vscode\",{recursive:true});fs.writeFileSync(\"out-test/node_modules/vscode/index.js\",\"module.exports={workspace:{createFileSystemWatcher:()=>({onDidCreate:function(){},onDidChange:function(){},onDidDelete:function(){},dispose:function(){}})}};\");' && node out-test/test/sidebarAutoRefreshService.test.js"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
