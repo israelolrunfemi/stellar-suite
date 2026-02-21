@@ -201,6 +201,32 @@ const copyContractIdCommand = vscode.commands.registerCommand(
     context.subscriptions.push(showNotificationHistoryCommand, openNotificationPreferencesCommand);
     outputChannel.appendLine('[Extension] Toast notification system initialized');
 
+    // Initialize compilation status monitoring
+    compilationMonitor = new CompilationStatusMonitor(context);
+    compilationStatusProvider = new CompilationStatusProvider(compilationMonitor);
+    outputChannel.appendLine('[Extension] Compilation status monitoring initialized');
+
+    // Initialize CLI history and replay services
+    cliHistoryService = new CliHistoryService(context);
+    cliReplayService = new CliReplayService(cliHistoryService);
+
+    // Initialize and register sidebar
+    sidebarProvider = new SidebarViewProvider(
+      context.extensionUri,
+      context,
+      cliHistoryService,
+      cliReplayService
+    );
+    sidebarProvider.setStatusServices(compilationMonitor, healthMonitor);
+
+    context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider(
+        SidebarViewProvider.viewType,
+        sidebarProvider
+      )
+    );
+    outputChannel.appendLine('[Extension] Sidebar view provider registered');
+
     outputChannel.appendLine("[Extension] All services initialized");
 
     // Wire CLI version warnings to sidebar
@@ -431,6 +457,7 @@ const copyContractIdCommand = vscode.commands.registerCommand(
 }
 
 export function deactivate() {
+  sidebarProvider?.dispose();
   dependencyWatcherService?.dispose();
   healthMonitor?.dispose();
   healthStatusBar?.dispose();
