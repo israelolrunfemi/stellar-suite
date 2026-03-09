@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
-import UseCasesSection from "@/components/UseCasesSection";
+import ProductsSection from "@/components/ProductsSection";
 import NewsSection from "@/components/NewsSection";
 import TrustSection from "@/components/TrustSection";
 import CtaSection from "@/components/CtaSection";
@@ -16,7 +16,7 @@ export default function Home() {
       <AnnouncementBanner />
       <HeroSection />
       <FeaturesSection />
-      <UseCasesSection />
+      <ProductsSection />
       <NewsSection />
       <TrustSection />
       <CtaSection />

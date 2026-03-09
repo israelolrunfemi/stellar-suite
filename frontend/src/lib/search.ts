@@ -1,8 +1,7 @@
 import { ALL_POSTS } from "./post";
 import { FAQ_CATEGORIES } from "./faq";
-import { changelogData } from "./data/changelog";
 
-export type SearchCategory = "page" | "blog" | "changelog" | "faq" | "docs";
+export type SearchCategory = "page" | "blog" | "faq" | "docs";
 
 export interface SearchResult {
   title: string;
@@ -19,15 +18,9 @@ const STATIC_PAGES: SearchResult[] = [
     category: "page",
   },
   {
-    title: "Features",
-    excerpt: "One-click deploy, transaction simulation, contract scaffolding, and more.",
-    link: "/#features",
-    category: "page",
-  },
-  {
-    title: "Use Cases",
-    excerpt: "Endless ways to build on Stellar: deploy, simulate, build, test, and manage.",
-    link: "/#use-cases",
+    title: "Products",
+    excerpt: "Kit Studio for VS Code and Kit Canvas for the browser — everything you need to build on Soroban.",
+    link: "/#products",
     category: "page",
   },
   {
@@ -41,7 +34,6 @@ const STATIC_PAGES: SearchResult[] = [
 export function getSearchIndex(): SearchResult[] {
   const index: SearchResult[] = [...STATIC_PAGES];
 
-  // Blog posts
   ALL_POSTS.forEach((post) => {
     index.push({
       title: post.title,
@@ -51,17 +43,6 @@ export function getSearchIndex(): SearchResult[] {
     });
   });
 
-  // Changelog
-  changelogData.forEach((release) => {
-    index.push({
-      title: `Changelog v${release.version}`,
-      excerpt: release.entries.flatMap((e) => e.items).join(" ").slice(0, 150) + "...",
-      link: "/changelog",
-      category: "changelog",
-    });
-  });
-
-  // FAQ
   FAQ_CATEGORIES.forEach((cat) => {
     cat.items.forEach((item) => {
       index.push({

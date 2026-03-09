@@ -2,24 +2,20 @@ import { ArrowUpRight } from "lucide-react";
 
 const news = [
   {
-    title: "Stellar Kit 1.0: Build, deploy & simulate in VS Code",
-    description: "The first stable release brings one-click deployment, transaction simulation, and full contract management to your editor.",
-    span: "col-span-1 row-span-2",
+    title: "Stellar Kit: Two products, one mission for Soroban developers",
+    description: "Kit Studio for VS Code and Kit Canvas for the browser — build, deploy, and simulate smart contracts wherever you work.",
   },
   {
-    title: "Why developers are switching to Stellar Kit",
-    description: "From memorizing terminal commands to clicking a button — see how Stellar Kit transforms the Soroban workflow.",
-    span: "col-span-1 row-span-1",
+    title: "Kit Canvas: Remix-style IDE for Soroban",
+    description: "Write, compile, and deploy Soroban contracts entirely in the browser. No installs, no setup — just code.",
+  },
+  {
+    title: "Kit Studio 1.0: The VS Code extension goes stable",
+    description: "One-click deployment, transaction simulation, and full contract management — all inside your editor.",
   },
   {
     title: "Deploy NFTs on Soroban in under 60 seconds",
-    description: "A step-by-step guide using Stellar Kit to scaffold, build, and deploy an NFT contract to testnet.",
-    span: "col-span-1 row-span-1",
-  },
-  {
-    title: "Simulate easily with Stellar Kit",
-    description: "Simulate transactions easily with Stellar Kit's intuitive interface.",
-    span: "col-span-1 row-span-1",
+    description: "A step-by-step guide using Kit Canvas to scaffold, build, and deploy an NFT contract to testnet.",
   },
 ];
 
@@ -86,8 +82,6 @@ const NewsSection = () => {
               </div>
             </div>
           </div>
-
-          {/* Bottom card under medium */}
         </div>
       </div>
     </section>

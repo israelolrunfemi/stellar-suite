@@ -17,7 +17,7 @@ When creating NFTs, your off-chain `uri` should resolve to a JSON file following
 ```json
 {
   "name": "Stellar Kit NFT #1",
-  "description": "The first official NFT minted during the Stellar Kit (prev. Stellar Suite) showcase.",
+  "description": "The first official NFT minted during the Kit Studio by Stellar Kit showcase.",
   "image": "ipfs://QmYourImageHashHere",
   "attributes": [
     {

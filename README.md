@@ -1,12 +1,12 @@
-# Stellar Kit (prev. Stellar Suite)
+# Kit Studio by Stellar Kit
 
-[![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/0xVida.stellar-kit?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=0xVida.stellar-kit)
+[![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/0xVida.stellar-kit?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=0xVida.stellar-kit-studio)
 [![License](https://img.shields.io/github/license/0xVida/stellar-suite?style=flat-square)](LICENSE.md)
 [![Stellar](https://img.shields.io/badge/Stellar-Soroban-black?style=flat-square&logo=stellar)](https://stellar.org)
 
-- **Extension:** [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=0xVida.stellar-kit) · **Manage:** [Publisher Hub](https://marketplace.visualstudio.com/manage/publishers/0xVida/extensions/stellar-kit/hub)
+- **Extension:** [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=0xVida.stellar-kit-studio) · **Manage:** [Publisher Hub](https://marketplace.visualstudio.com/manage/publishers/0xVida/extensions/stellar-kit/hub)
 
-**Stellar Kit** is a developer toolkit for building, deploying, and managing smart contracts on the Stellar network—directly from your editor. Build, deploy, and simulate Soroban contracts from VS Code without jumping between the terminal and the editor: the Stellar CLI is wired into a sidebar and commands so you can stay in the flow.
+**Kit Studio** is a developer toolkit for building, deploying, and managing smart contracts on the Stellar network—directly from your editor. Build, deploy, and simulate Soroban contracts from VS Code without jumping between the terminal and the editor: the Stellar CLI is wired into a sidebar and commands so you can stay in the flow.
 
 ---
 
@@ -26,10 +26,10 @@
 
 ## Install and run
 
-Install **Stellar Kit** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=0xVida.stellar-kit) (Extensions view, `Ctrl+Shift+X` / `Cmd+Shift+X`).
+Install **Kit Studio** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=0xVida.stellar-kit-studio) (Extensions view, `Ctrl+Shift+X` / `Cmd+Shift+X`).
 
 1. Open a workspace that has a Soroban contract (e.g. a `Cargo.toml` with `soroban-sdk`).
-2. Open the **Stellar Kit** sidebar from the Activity Bar.
+2. Open the **Kit Studio** sidebar from the Activity Bar.
 3. Use **Build** on a contract, then **Deploy** or **Simulate** as needed.
 
 **Build from source:** clone the repo, run `npm install` and `npm run compile`, then press `F5` in VS Code to launch the Extension Development Host.

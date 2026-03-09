@@ -1,4 +1,4 @@
-# Stellar Kit (prev. Stellar Suite) Promotional Assets
+# Kit Studio by Stellar Kit Promotional Assets
 
 This directory contains the promotional banners and design assets for the Stellar Kit VS Code Marketplace listing.
 

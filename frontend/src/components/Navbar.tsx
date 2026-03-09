@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { EXTENSION_ITEM_URL } from "@/lib/constants";
 import { SearchDialog } from "./SearchDialog";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  const productsHref = pathname === "/" ? "#products" : "/#products";
+  const getStartedHref = pathname === "/" ? "#hero" : "/#hero";
 
   return (
     <nav
@@ -27,17 +31,9 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-8">
-          <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</a>
-          <a href="#use-cases" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Use Cases</a>
-          <Link href="/use-cases" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Examples</Link>
-          <Link href="/community" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Community</Link>
-          <a href="#get-started" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Get Started</a>
-          <Link
-            href="/changelog"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Changelog
-          </Link>
+          <a href={productsHref} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Products</a>
+          <Link href="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+          <Link href="/faq" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">FAQ</Link>
           <a
             href="https://github.com"
             target="_blank"
@@ -47,12 +43,10 @@ const Navbar = () => {
             GitHub
           </a>
           <a
-            href={EXTENSION_ITEM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={getStartedHref}
             className="btn-primary !py-2.5 !px-6 !text-sm !rounded-lg"
           >
-            Install Free
+            Get Started
           </a>
         </div>
 
@@ -72,14 +66,11 @@ const Navbar = () => {
           <div className="py-2">
             <SearchDialog />
           </div>
-          <a href="#features" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">Features</a>
-          <a href="#use-cases" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">Use Cases</a>
-          <Link href="/use-cases" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">Examples</Link>
-          <Link href="/community" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">Community</Link>
-          <a href="#get-started" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">Get Started</a>
-          <Link href="/changelog" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">Changelog</Link>
-          <a href={EXTENSION_ITEM_URL} target="_blank" rel="noopener noreferrer" className="btn-primary !text-sm text-center">
-            Install Free
+          <a href={productsHref} onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">Products</a>
+          <Link href="/blog" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">Blog</Link>
+          <Link href="/faq" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">FAQ</Link>
+          <a href={getStartedHref} onClick={() => setOpen(false)} className="btn-primary !text-sm text-center">
+            Get Started
           </a>
         </div>
       )}

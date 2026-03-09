@@ -1,8 +1,8 @@
 {
-  "name": "stellar-kit",
-  "displayName": "Stellar Kit",
-  "description": "Stellar Kit — Build, deploy, and manage Soroban smart contracts on Stellar directly from VS Code. One-click deploy, transaction simulation, and integrated CLI workflows.",
-  "version": "0.1.2",
+  "name": "stellar-kit-studio",
+  "displayName": "Stellar Kit Studio",
+  "description": "Kit Studio by Stellar Kit — Build, deploy, and manage Soroban smart contracts on Stellar directly from VS Code. One-click deploy, transaction simulation, and integrated CLI workflows.",
+  "version": "0.1.0",
   "publisher": "0xVida",
   "icon": "icon.png",
   "repository": {
@@ -32,7 +32,7 @@
       "activitybar": [
         {
           "id": "stellar-suite",
-          "title": "Stellar Kit",
+          "title": "Kit Studio",
           "icon": "resources/stellar-icon.png"
         }
       ]
@@ -51,11 +51,11 @@
     "commands": [
       {
         "command": "stellarSuite.simulateTransaction",
-        "title": "Stellar Kit: Simulate Soroban Transaction"
+        "title": "Kit Studio: Simulate Soroban Transaction"
       },
       {
         "command": "stellarSuite.deployContract",
-        "title": "Stellar Kit: Deploy Contract"
+        "title": "Kit Studio: Deploy Contract"
       },
       {
         "command": "stellarSuite.refreshContracts",
@@ -64,17 +64,17 @@
       },
       {
         "command": "stellarSuite.clearSimulationCache",
-        "title": "Stellar Kit: Clear Simulation Cache",
+        "title": "Kit Studio: Clear Simulation Cache",
         "icon": "$(trash)"
       },
       {
         "command": "stellarSuite.showSimulationCacheStats",
-        "title": "Stellar Kit: Simulation Cache Stats",
+        "title": "Kit Studio: Simulation Cache Stats",
         "icon": "$(info)"
       },
       {
         "command": "stellarSuite.deployBatch",
-        "title": "Stellar Kit: Deploy Batch",
+        "title": "Kit Studio: Deploy Batch",
         "icon": "$(cloud-upload)"
       },
       {
@@ -89,203 +89,203 @@
       },
       {
         "command": "stellarSuite.buildContract",
-        "title": "Stellar Kit: Build Contract"
+        "title": "Kit Studio: Build Contract"
       },
       {
         "command": "stellarSuite.configureCli",
-        "title": "Stellar Kit: Configure CLI"
+        "title": "Kit Studio: Configure CLI"
       },
       {
         "command": "stellarSuite.showSimulationHistory",
-        "title": "Stellar Kit: Show Simulation History"
+        "title": "Kit Studio: Show Simulation History"
       },
       {
         "command": "stellarSuite.clearSimulationHistory",
-        "title": "Stellar Kit: Clear Simulation History"
+        "title": "Kit Studio: Clear Simulation History"
       },
       {
         "command": "stellarSuite.exportSimulationHistory",
-        "title": "Stellar Kit: Export Simulation History"
+        "title": "Kit Studio: Export Simulation History"
       },
       {
         "command": "stellarSuite.importSimulationHistory",
-        "title": "Stellar Kit: Import Simulation History"
+        "title": "Kit Studio: Import Simulation History"
       },
       {
         "command": "stellarSuite.searchSimulationHistory",
-        "title": "Stellar Kit: Search Simulation History"
+        "title": "Kit Studio: Search Simulation History"
       },
       {
         "command": "stellarSuite.showCompilationStatus",
-        "title": "Stellar Kit: Show Compilation Status"
+        "title": "Kit Studio: Show Compilation Status"
       },
       {
         "command": "stellarSuite.createBackup",
-        "title": "Stellar Kit: Create State Backup"
+        "title": "Kit Studio: Create State Backup"
       },
       {
         "command": "stellarSuite.restoreBackup",
-        "title": "Stellar Kit: Restore State from Backup"
+        "title": "Kit Studio: Restore State from Backup"
       },
       {
         "command": "stellarSuite.showBackupHistory",
-        "title": "Stellar Kit: Show Backup History"
+        "title": "Kit Studio: Show Backup History"
       },
       {
         "command": "stellarSuite.deleteBackup",
-        "title": "Stellar Kit: Delete Backup"
+        "title": "Kit Studio: Delete Backup"
       },
       {
         "command": "stellarSuite.validateBackups",
-        "title": "Stellar Kit: Validate Backups"
+        "title": "Kit Studio: Validate Backups"
       },
       {
         "command": "stellarSuite.clearAllBackups",
-        "title": "Stellar Kit: Clear All Backups"
+        "title": "Kit Studio: Clear All Backups"
       },
       {
         "command": "stellarSuite.exportBackups",
-        "title": "Stellar Kit: Export Backups"
+        "title": "Kit Studio: Export Backups"
       },
       {
         "command": "stellarSuite.importBackups",
-        "title": "Stellar Kit: Import Backups"
+        "title": "Kit Studio: Import Backups"
       },
       {
         "command": "stellarSuite.replaySimulation",
-        "title": "Stellar Kit: Replay Simulation"
+        "title": "Kit Studio: Replay Simulation"
       },
       {
         "command": "stellarSuite.replayWithModifications",
-        "title": "Stellar Kit: Replay Simulation with Modifications"
+        "title": "Kit Studio: Replay Simulation with Modifications"
       },
       {
         "command": "stellarSuite.batchReplaySimulations",
-        "title": "Stellar Kit: Batch Replay Simulations"
+        "title": "Kit Studio: Batch Replay Simulations"
       },
       {
         "command": "stellarSuite.exportReplayResults",
-        "title": "Stellar Kit: Export Replay Results"
+        "title": "Kit Studio: Export Replay Results"
       },
       {
         "command": "stellarSuite.compareSimulations",
-        "title": "Stellar Kit: Compare Simulations"
+        "title": "Kit Studio: Compare Simulations"
       },
       {
         "command": "stellarSuite.compareSelected",
-        "title": "Stellar Kit: Compare Selected Simulations"
+        "title": "Kit Studio: Compare Selected Simulations"
       },
       {
         "command": "stellarSuite.compareLastN",
-        "title": "Stellar Kit: Compare Last N Simulations"
+        "title": "Kit Studio: Compare Last N Simulations"
       },
       {
         "command": "stellarSuite.compareSameContract",
-        "title": "Stellar Kit: Compare Simulations (Same Contract)"
+        "title": "Kit Studio: Compare Simulations (Same Contract)"
       },
       {
         "command": "stellarSuite.compareSameFunction",
-        "title": "Stellar Kit: Compare Simulations (Same Function)"
+        "title": "Kit Studio: Compare Simulations (Same Function)"
       },
       {
         "command": "stellarSuite.showSimulationDiff",
-        "title": "Stellar Kit: Show Simulation Diff"
+        "title": "Kit Studio: Show Simulation Diff"
       },
       {
         "command": "stellarSuite.compareWithPrevious",
-        "title": "Stellar Kit: Compare With Previous Simulation"
+        "title": "Kit Studio: Compare With Previous Simulation"
       },
       {
         "command": "stellarSuite.compareTwoSimulations",
-        "title": "Stellar Kit: Compare Two Simulations"
+        "title": "Kit Studio: Compare Two Simulations"
       },
       {
         "command": "stellarSuite.compareLatestWithAny",
-        "title": "Stellar Kit: Compare Latest With Any"
+        "title": "Kit Studio: Compare Latest With Any"
       },
       {
         "command": "stellarSuite.showResourceProfile",
-        "title": "Stellar Kit: Show Resource Profile"
+        "title": "Kit Studio: Show Resource Profile"
       },
       {
         "command": "stellarSuite.compareResourceProfiles",
-        "title": "Stellar Kit: Compare Resource Profiles"
+        "title": "Kit Studio: Compare Resource Profiles"
       },
       {
         "command": "stellarSuite.exportResourceProfiles",
-        "title": "Stellar Kit: Export Resource Profiles"
+        "title": "Kit Studio: Export Resource Profiles"
       },
       {
         "command": "stellarSuite.importResourceProfiles",
-        "title": "Stellar Kit: Import Resource Profiles"
+        "title": "Kit Studio: Import Resource Profiles"
       },
       {
         "command": "stellarSuite.showResourceStats",
-        "title": "Stellar Kit: Show Resource Statistics"
+        "title": "Kit Studio: Show Resource Statistics"
       },
       {
         "command": "stellarSuite.clearResourceProfiles",
-        "title": "Stellar Kit: Clear Resource Profiles"
+        "title": "Kit Studio: Clear Resource Profiles"
       },
       {
         "command": "stellarSuite.manageRpcAuth",
-        "title": "Stellar Kit: Manage RPC Authentication"
+        "title": "Kit Studio: Manage RPC Authentication"
       },
       {
         "command": "stellarSuite.manageEnvVariables",
-        "title": "Stellar Kit: Manage Environment Variables"
+        "title": "Kit Studio: Manage Environment Variables"
       },
       {
         "command": "stellarSuite.checkCliVersion",
-        "title": "Stellar Kit: Check CLI Version"
+        "title": "Kit Studio: Check CLI Version"
       },
       {
         "command": "stellarSuite.openNotificationPreferences",
-        "title": "Stellar Kit: Open Notification Preferences"
+        "title": "Kit Studio: Open Notification Preferences"
       },
       {
         "command": "stellarSuite.generateAbi",
-        "title": "Stellar Kit: Generate Contract ABI"
+        "title": "Kit Studio: Generate Contract ABI"
       },
       {
         "command": "stellarSuite.exportAbi",
-        "title": "Stellar Kit: Export Contract ABI"
+        "title": "Kit Studio: Export Contract ABI"
       },
       {
         "command": "stellarSuite.importAbi",
-        "title": "Stellar Kit: Import Contract ABI"
+        "title": "Kit Studio: Import Contract ABI"
       },
       {
         "command": "stellarSuite.showAbiDetails",
-        "title": "Stellar Kit: Show ABI Details"
+        "title": "Kit Studio: Show ABI Details"
       },
       {
         "command": "stellarSuite.parseContractSource",
-        "title": "Stellar Kit: Parse Contract Source Code"
+        "title": "Kit Studio: Parse Contract Source Code"
       },
       {
         "command": "stellarSuite.showRpcHealth",
-        "title": "Stellar Kit: Show RPC Health"
+        "title": "Kit Studio: Show RPC Health"
       },
       {
         "command": "stellarSuite.checkRpcHealth",
-        "title": "Stellar Kit: Check RPC Health"
+        "title": "Kit Studio: Check RPC Health"
       },
       {
         "command": "stellarSuite.viewRpcHistory",
-        "title": "Stellar Kit: View RPC History"
+        "title": "Kit Studio: View RPC History"
       },
       {
         "command": "stellarSuite.switchRpcEndpoint",
-        "title": "Stellar Kit: Switch RPC Endpoint"
+        "title": "Kit Studio: Switch RPC Endpoint"
       },
       {
         "command": "stellarSuite.viewCircuitBreakerStatus",
-        "title": "Stellar Kit: View Circuit Breaker Status"
+        "title": "Kit Studio: View Circuit Breaker Status"
       },
       {
         "command": "stellarSuite.resetCircuitBreaker",
-        "title": "Stellar Kit: Reset Circuit Breaker"
+        "title": "Kit Studio: Reset Circuit Breaker"
       }
     ],
     "menus": {
@@ -336,7 +336,7 @@
       }
     ],
     "configuration": {
-      "title": "Stellar Kit",
+      "title": "Kit Studio",
       "properties": {
         "stellarSuite.rpcUrl": {
           "type": "string",

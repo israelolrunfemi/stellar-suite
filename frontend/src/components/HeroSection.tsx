@@ -1,101 +1,114 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import screenshotSimulate from "@/assets/screenshot-simulate.png";
-import screenshotDeploy from "@/assets/screenshot-deploy.png";
-import { useState } from "react";
+import screenshotStudio from "@/assets/screenshot-studio.png";
+import screenshotCanvas from "@/assets/screenshot-canvas.png";
 import { EXTENSION_ITEM_URL } from "@/lib/constants";
 
+const slides = [
+  {
+    src: screenshotStudio,
+    alt: "Kit Studio — Soroban development in VS Code",
+    label: "Kit Studio",
+    sub: "VS Code",
+  },
+  {
+    src: screenshotCanvas,
+    alt: "Kit Canvas — Soroban development in the browser",
+    label: "Kit Canvas",
+    sub: "Browser",
+  },
+];
+
 const HeroSection = () => {
-  const [activeShot, setActiveShot] = useState<"simulate" | "deploy">("simulate");
+  const [active, setActive] = useState(0);
+
+  const next = useCallback(() => setActive((i) => (i + 1) % slides.length), []);
+
+  useEffect(() => {
+    const id = setInterval(next, 4500);
+    return () => clearInterval(id);
+  }, [next]);
 
   return (
-    <section className="pt-32 sm:pt-36 md:pt-40 pb-16 sm:pb-20 px-6" style={{ background: "hsl(var(--hero-bg))" }}>
-      <div className="container mx-auto max-w-4xl text-center">
-        {/* Heading */}
+    <section
+      id="hero"
+      className="pt-24 sm:pt-28 md:pt-32 pb-20 sm:pb-28 px-6"
+      style={{ background: "hsl(var(--hero-bg))" }}
+    >
+      <div className="container mx-auto max-w-5xl text-center">
         <h1
           className="text-4xl sm:text-5xl md:text-7xl font-display font-extrabold leading-[1.08] tracking-tight mb-6 animate-fade-up"
           style={{ color: "hsl(var(--hero-foreground))" }}
         >
-          Find out what&apos;s possible
+          The complete toolkit
           <br />
-          when Soroban connects
+          for <span className="text-gradient-blue">Soroban</span>
         </h1>
 
-        {/* Subtitle */}
         <p
-          className="text-lg md:text-xl font-body max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up opacity-80"
+          className="text-lg md:text-xl font-body max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-up opacity-80"
           style={{ color: "hsl(var(--hero-foreground))", animationDelay: "0.1s" }}
         >
-          Whether you&apos;re building smart contracts or deploying to Stellar, Stellar Kit (prev. Stellar Suite)
-          makes it easier to build, deploy, and simulate — all from VS Code.
+          Build, deploy, and simulate Stellar smart contracts — in your editor
+          with <strong>Kit Studio</strong> or straight from the browser with{" "}
+          <strong>Kit Canvas</strong>. Same power, your choice.
         </p>
-
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-          <a
-            href={EXTENSION_ITEM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-primary text-base"
-          >
-            Install Extension
-          </a>
-          <a href="#features" className="btn-outline-light text-base">
-            Explore Features
-          </a>
-        </div>
-      </div>
-
-      {/* Screenshot tabs */}
-      <div className="container mx-auto max-w-5xl mt-16 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-        <div className="flex justify-center gap-3 mb-6" role="tablist" aria-label="Extension views">
-          <button
-            onClick={() => setActiveShot("simulate")}
-            className={`rounded-full px-5 py-2 text-sm font-semibold font-display transition-all duration-200 border ${
-              activeShot === "simulate"
-                ? "border-white/40 bg-white/10 text-white"
-                : "border-transparent text-white/60 hover:text-white/90"
-            }`}
-            role="tab"
-            id="hero-tab-simulate"
-            aria-selected={activeShot === "simulate"}
-            aria-controls="hero-screenshot"
-          >
-            Simulation
-          </button>
-          <button
-            onClick={() => setActiveShot("deploy")}
-            className={`rounded-full px-5 py-2 text-sm font-semibold font-display transition-all duration-200 border ${
-              activeShot === "deploy"
-                ? "border-white/40 bg-white/10 text-white"
-                : "border-transparent text-white/60 hover:text-white/90"
-            }`}
-            role="tab"
-            id="hero-tab-deploy"
-            aria-selected={activeShot === "deploy"}
-            aria-controls="hero-screenshot"
-          >
-            Deployment
-          </button>
-        </div>
 
         <div
-          id="hero-screenshot"
-          className="rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-          role="tabpanel"
-          aria-labelledby={activeShot === "simulate" ? "hero-tab-simulate" : "hero-tab-deploy"}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20 animate-fade-up"
+          style={{ animationDelay: "0.2s" }}
         >
-          <Image
-            src={activeShot === "simulate" ? screenshotSimulate : screenshotDeploy}
-            alt={activeShot === "simulate" ? "Stellar Kit (prev. Stellar Suite) VS Code extension — transaction simulation. MVP screenshot may show Stellar Suite in the UI." : "Stellar Kit (prev. Stellar Suite) VS Code extension — contract deployment. MVP screenshot may show Stellar Suite in the UI."}
-            className="w-full"
-            sizes="(max-width: 768px) 100vw, 900px"
-          />
+          <a href={EXTENSION_ITEM_URL} target="_blank" rel="noopener noreferrer" className="btn-primary text-base">
+            Try Studio
+          </a>
+          <a href="https://canvas.stellarkit.dev" target="_blank" rel="noopener noreferrer" className="btn-outline-light text-base">
+            Try Canvas
+          </a>
         </div>
-        <p className="mt-3 text-center text-sm opacity-80" style={{ color: "hsl(var(--hero-foreground))" }}>
-          MVP screenshot — extension was then named Stellar Suite (now Stellar Kit).
-        </p>
+
+        {/* Carousel */}
+        <div className="relative max-w-4xl mx-auto animate-fade-up" style={{ animationDelay: "0.3s" }}>
+          <div className="overflow-hidden rounded-2xl shadow-2xl border border-white/10">
+            <div
+              className="flex transition-transform duration-700 ease-in-out"
+              style={{ transform: `translateX(-${active * 100}%)` }}
+            >
+              {slides.map((s) => (
+                <div key={s.label} className="min-w-full">
+                  <Image
+                    src={s.src}
+                    alt={s.alt}
+                    className="w-full"
+                    sizes="(max-width: 768px) 100vw, 800px"
+                    priority
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Label */}
+          <p className="mt-4 text-sm font-display font-semibold opacity-90" style={{ color: "hsl(var(--hero-foreground))" }}>
+            {slides[active].label}
+            <span className="font-body font-normal opacity-60 ml-2">{slides[active].sub}</span>
+          </p>
+
+          {/* Dots */}
+          <div className="flex items-center justify-center gap-2 mt-3">
+            {slides.map((s, i) => (
+              <button
+                key={s.label}
+                onClick={() => setActive(i)}
+                aria-label={`Show ${s.label}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === active ? "w-6 bg-primary" : "w-2 bg-white/40 hover:bg-white/60"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
